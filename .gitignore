@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+venv/
+logs/
+*.log
+debug_test.py
+*.old
+*.backup
+ipwndfu/
+palera1n/
