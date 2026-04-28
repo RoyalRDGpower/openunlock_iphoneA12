@@ -14,9 +14,14 @@ class iOSDevice:
     
     def is_connected(self):
         """Check if iOS device is connected"""
+        import platform
+        cmd = 'ideviceinfo'
+        if platform.system() == 'Windows':
+            cmd = 'ideviceinfo.exe' # Look for bundled exe
+            
         try:
             result = subprocess.run(
-                ['ideviceinfo'],
+                [cmd],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -24,17 +29,29 @@ class iOSDevice:
             self.connected = result.returncode == 0
             return self.connected
         except Exception as e:
+            # Fallback for Windows if binary is not in PATH
+            if platform.system() == 'Windows':
+                return self._check_windows_fallback()
             print(f"Error checking device: {e}")
             return False
+
+    def _check_windows_fallback(self):
+        """Special fallback for Windows using alternative detection if available"""
+        return False # To be implemented with bundled binaries
     
     def get_device_info(self):
         """Get detailed device information"""
         if not self.is_connected():
             return None
         
+        import platform
+        cmd = 'ideviceinfo'
+        if platform.system() == 'Windows':
+            cmd = 'ideviceinfo.exe'
+
         try:
             result = subprocess.run(
-                ['ideviceinfo'],
+                [cmd],
                 capture_output=True,
                 text=True,
                 timeout=10
@@ -118,9 +135,14 @@ class iOSDevice:
     
     def get_battery_level(self):
         """Get battery percentage"""
+        import platform
+        cmd = 'ideviceinfo'
+        if platform.system() == 'Windows':
+            cmd = 'ideviceinfo.exe'
+
         try:
             result = subprocess.run(
-                ['ideviceinfo', '-k', 'BatteryCurrentCapacity'],
+                [cmd, '-k', 'BatteryCurrentCapacity'],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -200,9 +222,14 @@ class iOSDevice:
     
     def exit_recovery(self):
         """Exit recovery mode"""
+        import platform
+        cmd = 'idevicerestore'
+        if platform.system() == 'Windows':
+            cmd = 'idevicerestore.exe'
+
         try:
             subprocess.run(
-                ['idevicerestore', '--exit-recovery'],
+                [cmd, '--exit-recovery'],
                 capture_output=True,
                 timeout=10
             )

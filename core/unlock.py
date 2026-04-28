@@ -54,8 +54,16 @@ class Unlocker:
             
             # Step 2: Run checkm8 exploit
             self.log("\n⚡ STEP 2: Running checkm8 exploit...")
+            
+            import platform
+            if platform.system() == 'Windows':
+                # On Windows, we'll use a specialized binary or direct python call if Admin
+                cmd = ['python', 'ipwndfu.py', '-p']
+            else:
+                cmd = ['sudo', 'python3', 'ipwndfu.py', '-p']
+
             result = subprocess.run(
-                ['sudo', 'python3', 'ipwndfu.py', '-p'],
+                cmd,
                 cwd=ipwndfu_path,
                 capture_output=True,
                 text=True,
@@ -116,8 +124,16 @@ class Unlocker:
             
             # Step 2: Run palera1n
             self.log("\n🔨 STEP 2: Running palera1n jailbreak...")
+            
+            import platform
+            if platform.system() == 'Windows':
+                self.log("⚠️ palera1n native Windows support is limited. Ensure you have the Windows port installed.")
+                cmd = ['./palera1n.exe']
+            else:
+                cmd = ['sudo', './palera1n.sh']
+
             result = subprocess.run(
-                ['sudo', './palera1n.sh'],
+                cmd,
                 cwd=palera1n_path,
                 capture_output=True,
                 text=True,
@@ -164,9 +180,13 @@ class Unlocker:
             'python3': False
         }
         
+        import platform
+        is_windows = platform.system() == 'Windows'
+        
         for tool in required:
             try:
-                subprocess.run(['which', tool], check=True, capture_output=True)
+                check_cmd = ['where', tool] if is_windows else ['which', tool]
+                subprocess.run(check_cmd, check=True, capture_output=True)
                 required[tool] = True
             except:
                 required[tool] = False
