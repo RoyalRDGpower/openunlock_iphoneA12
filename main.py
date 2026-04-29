@@ -1,4 +1,3 @@
-cat > main.py << 'MAINEOF'
 #!/usr/bin/env python3
 """
 OpenUnlock Linux - Main GUI Application
@@ -520,3 +519,10 @@ def main():
         sys.exit(0)
     
     # Show main window
+    window = MainWindow()
+    window.show()
+    
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
