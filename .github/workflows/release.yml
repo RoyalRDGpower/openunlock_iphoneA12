@@ -26,29 +26,31 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libimobiledevice-utils idevicerestore usbmuxd libusb-1.0-0-dev python3-dev
+        sudo apt-get install -y libimobiledevice-utils idevicerestore usbmuxd libusb-1.0-0-dev python3-dev patchelf ccache
 
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller
+        pip install nuitka
 
-    - name: Build with PyInstaller (Windows)
+    - name: Build with Nuitka (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --onefile --noconsole --name "iUnlock_Pro_Windows" --add-data "core;core" main.py
+        python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --windows-disable-console --output-filename="iUnlock_Pro_Windows.exe" main.py
 
-    - name: Build with PyInstaller (Linux)
+    - name: Build with Nuitka (Linux)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        pyinstaller --onefile --windowed --name "iUnlock_Pro_Linux" --add-data "core:core" main.py
+        python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --output-filename="iUnlock_Pro_Linux" main.py
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: build-${{ matrix.os }}
-        path: dist/*
+        path: |
+          *.exe
+          iUnlock_Pro_Linux*
 
   release:
     name: Create Release
@@ -59,14 +61,12 @@ jobs:
     steps:
     - name: Download Artifacts
       uses: actions/download-artifact@v4
-      with:
-        path: dist
 
     - name: Create Release and Upload Assets
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          dist/build-windows-latest/*
-          dist/build-ubuntu-latest/*
+          build-windows-latest/*.exe
+          build-ubuntu-latest/iUnlock_Pro_Linux*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
